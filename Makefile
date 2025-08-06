@@ -949,6 +949,7 @@ KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS += $(call cc-disable-warning, builtin-declaration-mismatch)
 KBUILD_CFLAGS += $(call cc-disable-warning, stringop-overflow)
 KBUILD_CFLAGS += $(call cc-disable-warning, attributes)
+KBUILD_CFLAGS += $(call cc-disable-warning, fortify-source)
 # conserve stack if available
 #KBUILD_CFLAGS   += $(call cc-option,-fconserve-stack)
 
