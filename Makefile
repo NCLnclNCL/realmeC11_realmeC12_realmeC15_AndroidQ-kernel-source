@@ -347,6 +347,7 @@ scripts/Kbuild.include: ;
 include scripts/Kbuild.include
 
 # Make variables (CC, etc...)
+AS		= $(CROSS_COMPILE)as
 CPP		= $(CC) -E
 ifneq ($(LLVM),)
 CC		= clang
