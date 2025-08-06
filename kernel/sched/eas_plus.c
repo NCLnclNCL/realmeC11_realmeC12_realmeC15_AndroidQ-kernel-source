@@ -698,7 +698,7 @@ static int check_freq_turning(void)
 
 	return false;
 }
-
+DECLARE_PER_CPU(struct hmp_domain *, hmp_cpu_domain);
 static void
 hmp_fastest_idle_prefer_pull(int this_cpu, struct task_struct **p,
 						struct rq **target)
@@ -715,7 +715,7 @@ hmp_fastest_idle_prefer_pull(int this_cpu, struct task_struct **p,
 	int check_min_cap;
 	int turning;
 
-	hmp_domain = hmp_cpu_domain(this_cpu);
+	hmp_domain = per_cpu(hmp_cpu_domain, this_cpu);
 
 	/* 1. select a runnable task
 	 *
