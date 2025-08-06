@@ -83,7 +83,9 @@ static int mt_get_cpu_load(u32 cpu)
 
 static int mt_set_boost(u32 boost)
 {
+#ifdef CONFIG_MTK_SCHED_BOOST
 	set_sched_boost(boost);
+#endif
 	return 0;
 }
 

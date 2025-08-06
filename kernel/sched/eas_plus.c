@@ -697,7 +697,6 @@ hmp_slowest_idle_prefer_pull(int this_cpu, struct task_struct **p,
 		return;
 	}
 }
-
 static int check_freq_turning(void)
 {
 	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
@@ -715,6 +714,7 @@ static int check_freq_turning(void)
 
 	return false;
 }
+
 DECLARE_PER_CPU(struct hmp_domain *, hmp_cpu_domain);
 static void
 hmp_fastest_idle_prefer_pull(int this_cpu, struct task_struct **p,
@@ -1027,6 +1027,23 @@ done:
 }
 
 #else
+static int check_freq_turning(void)
+{
+	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
+	unsigned long capacity_curr_little, capacity_curr_big;
+
+	if (rd->min_cap_orig_cpu < 0 || rd->max_cap_orig_cpu < 0)
+		return false;
+
+	capacity_curr_little = capacity_curr_of(rd->min_cap_orig_cpu);
+	capacity_curr_big = capacity_curr_of(rd->max_cap_orig_cpu);
+
+	if ((capacity_curr_little > cpu_eff_tp) &&
+			(capacity_curr_big <=  big_cpu_eff_tp))
+		return true;
+
+	return false;
+}
 bool idle_lb_enhance(struct task_struct *p, int cpu)
 {
 	return 0;
