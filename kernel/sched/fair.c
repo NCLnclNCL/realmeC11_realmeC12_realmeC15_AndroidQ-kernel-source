@@ -5112,9 +5112,10 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 #endif /* CONFIG_SMP */
 	hrtick_update(rq);
-
+#ifdef CONFIG_HMP_TRACER
 	trace_sched_runqueue_length(rq->cpu, rq->nr_running);
 	trace_sched_cfs_length(rq->cpu, rq->cfs.h_nr_running);
+#endif
 }
 
 static void set_next_buddy(struct sched_entity *se);
@@ -5213,9 +5214,10 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 #endif /* CONFIG_SMP */
 
 	hrtick_update(rq);
-
+#ifdef CONFIG_HMP_TRACER
 	trace_sched_runqueue_length(rq->cpu, rq->nr_running);
 	trace_sched_cfs_length(rq->cpu, rq->cfs.h_nr_running);
+#endif
 }
 
 #ifdef CONFIG_SMP

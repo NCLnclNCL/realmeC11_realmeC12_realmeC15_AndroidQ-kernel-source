@@ -158,13 +158,13 @@ extern struct cpumask hmp_fast_cpu_mask;
 extern struct cpumask hmp_slow_cpu_mask;
 
 #define hmp_cpu_domain(cpu)     (per_cpu(hmp_cpu_domain, (cpu)))
-
+#ifdef CONFIG_HMP_TRACER
 /* Number of task statistic to force migration */
 struct hmp_statisic {
 	unsigned int nr_force_up;
 	unsigned int nr_force_down;
 };
-
+#endif
 extern unsigned int hmp_cpu_is_slowest(int cpu);
 #else
 static inline unsigned int hmp_cpu_is_slowest(int cpu) { return false; }

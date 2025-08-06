@@ -808,7 +808,7 @@ TRACE_EVENT(sched_cpufreq_fastpath,
 		)
 );
 #endif
-
+#ifdef CONFIG_HMP_TRACER
 /*
  * Tracepoint for showing tracked migration information
  */
@@ -975,6 +975,7 @@ TRACE_EVENT(sched_hmp_load,
 /*
  * Tracepoint for dumping hmp statistics
  */
+
 TRACE_EVENT(sched_hmp_stats,
 
 		TP_PROTO(struct hmp_statisic *hmp_stats),
@@ -1215,7 +1216,7 @@ TRACE_EVENT(sched_cfs_length,
 			__entry->cpu,
 			__entry->length)
 	   );
-
+#endif /*CONFIG_HMP_TRACER*/
 /*
  * Tracepoint for fork time:
  */
