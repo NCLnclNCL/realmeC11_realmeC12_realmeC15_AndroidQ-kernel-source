@@ -302,8 +302,13 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
 
-HOSTCC       = gcc
-HOSTCXX      = g++
+ifneq ($(LLVM),)
+HOSTCC	= clang
+HOSTCXX	= clang++
+else
+HOSTCC	= gcc
+HOSTCXX	= g++
+endif
 HOSTCFLAGS   := -O2 -fomit-frame-pointer -std=gnu89
 HOSTCXXFLAGS = -O2
 
@@ -342,17 +347,29 @@ scripts/Kbuild.include: ;
 include scripts/Kbuild.include
 
 # Make variables (CC, etc...)
-AS		= $(CROSS_COMPILE)as
+CPP		= $(CC) -E
+ifneq ($(LLVM),)
+CC		= clang
+LD		= ld.lld
+AR		= llvm-ar
+NM		= llvm-nm
+OBJCOPY		= llvm-objcopy
+OBJDUMP		= llvm-objdump
+READELF		= llvm-readelf
+STRIP		= llvm-strip
+HOSTLDFLAGS	+= -fuse-ld=lld
+else
+CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)ld
 LDGOLD		= $(CROSS_COMPILE)ld.gold
-CC		= $(CROSS_COMPILE)gcc
-CPP		= $(CC) -E
 AR		= $(CROSS_COMPILE)ar
 NM		= $(CROSS_COMPILE)nm
 STRIP		= $(CROSS_COMPILE)strip
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 OBJDUMP		= $(CROSS_COMPILE)objdump
-AWK		= awk
+READELF		= $(CROSS_COMPILE)readelf
+STRIP           = $(CROSS_COMPILE)strip
+endif
 GENKSYMS	= scripts/genksyms/genksyms
 INSTALLKERNEL  := installkernel
 DEPMOD		= /sbin/depmod
@@ -456,7 +473,7 @@ KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
 KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
 
 export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION
-export ARCH SRCARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC
+export ARCH SRCARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE LD CC
 export CPP AR NM STRIP OBJCOPY OBJDUMP
 export MAKE AWK GENKSYMS INSTALLKERNEL PERL PYTHON UTS_MACHINE
 export HOSTCXX HOSTCXXFLAGS LDFLAGS_MODULE CHECK CHECKFLAGS
@@ -568,7 +585,9 @@ endif
 ifneq ($(GCC_TOOLCHAIN),)
 CLANG_FLAGS	+= --gcc-toolchain=$(GCC_TOOLCHAIN)
 endif
+ifneq ($(LLVM_IAS),1)
 CLANG_FLAGS	+= -no-integrated-as
+endif
 #CLANG_FLAGS	+= -Werror=unknown-warning-option
 KBUILD_CFLAGS	+= $(CLANG_FLAGS)
 KBUILD_AFLAGS	+= $(CLANG_FLAGS)
@@ -693,15 +712,17 @@ export CFLAGS_GCOV CFLAGS_KCOV
 # Make toolchain changes before including arch/$(SRCARCH)/Makefile to ensure
 # ar/cc/ld-* macros return correct values.
 ifdef CONFIG_LTO_CLANG
+ifneq ($(ld-name),lld)
 # use GNU gold with LLVMgold for LTO linking, and LD for vmlinux_link
 LDFINAL_vmlinux := $(LD)
 LD		:= $(LDGOLD)
 LDFLAGS		+= -plugin LLVMgold.so
+endif
 # use llvm-ar for building symbol tables from IR files, and llvm-dis instead
 # of objdump for processing symbol versions and exports
 LLVM_AR		:= llvm-ar
-LLVM_DIS	:= llvm-dis
-export LLVM_AR LLVM_DIS
+LLVM_NM		:= llvm-nm
+export LLVM_AR LLVM_NM
 endif
 
 # The arch Makefile can set ARCH_{CPP,A,C}FLAGS to override the default
@@ -725,19 +746,33 @@ KBUILD_CFLAGS	+= $(call cc-option,-fdata-sections,)
 endif
 
 ifdef CONFIG_LTO_CLANG
-lto-clang-flags	:= -flto -fvisibility=hidden
+ifdef CONFIG_THINLTO
+lto-clang-flags	:= -flto=thin
+LDFLAGS		+= --thinlto-cache-dir=.thinlto-cache
+else
+lto-clang-flags	:= -flto
+endif
+lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
+
+# Limit inlining across translation units to reduce binary size
+LD_FLAGS_LTO_CLANG := -mllvm -import-instr-limit=5
+
+KBUILD_LDFLAGS += $(LD_FLAGS_LTO_CLANG)
+KBUILD_LDFLAGS_MODULE += $(LD_FLAGS_LTO_CLANG)
+
+KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
 
 # allow disabling only clang LTO where needed
-DISABLE_LTO_CLANG := -fno-lto -fvisibility=default
+DISABLE_LTO_CLANG := -fno-lto
 export DISABLE_LTO_CLANG
 endif
 
 ifdef CONFIG_LTO
-lto-flags	:= $(lto-clang-flags)
-KBUILD_CFLAGS	+= $(lto-flags)
+LTO_CFLAGS	:= $(lto-clang-flags)
+KBUILD_CFLAGS	+= $(LTO_CFLAGS)
 
 DISABLE_LTO	:= $(DISABLE_LTO_CLANG)
-export DISABLE_LTO
+export LTO_CFLAGS DISABLE_LTO
 
 # LDFINAL_vmlinux and LDFLAGS_FINAL_vmlinux can be set to override
 # the linker and flags for vmlinux_link.
@@ -783,7 +818,25 @@ endif
 
 KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
 			$(call cc-disable-warning,maybe-uninitialized,))
+ifeq ($(cc-name),gcc)
+KBUILD_CFLAGS	+= -mcpu=cortex-a53 -mtune=cortex-a53
+endif
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS	+= -mcpu=cortex-a53+crypto -mtune=cortex-a53
 
+ifdef CONFIG_LLVM_POLLY
+KBUILD_CFLAGS	+= -mllvm -polly \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-reschedule=1 \
+                   -mllvm -polly-loopfusion-greedy=1 \
+                   -mllvm -polly-postopts=1 \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-detect-keep-going \
+		   -mllvm -polly-vectorizer=stripmine \
+		   -mllvm -polly-invariant-load-hoisting
+endif
+endif
+endif
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 
@@ -860,6 +913,10 @@ else
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 endif
 
+ifeq ($(ld-name),lld)
+LDFLAGS += -z norelro
+endif
+
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-const-variable)
 ifdef CONFIG_FRAME_POINTER
 KBUILD_CFLAGS	+= -fno-omit-frame-pointer -fno-optimize-sibling-calls
@@ -875,14 +932,28 @@ endif
 endif
 
 KBUILD_CFLAGS   += $(call cc-option, -fno-var-tracking-assignments)
+# Initialize all stack variables with a 0xAA pattern.
+ifdef CONFIG_INIT_STACK_ALL_PATTERN
+KBUILD_CFLAGS	+= -ftrivial-auto-var-init=pattern
+endif
 
+# Initialize all stack variables with a zero value.
+ifdef CONFIG_INIT_STACK_ALL_ZERO
+# Future support for zero initialization is still being debated, see
+# https://bugs.llvm.org/show_bug.cgi?id=45497. These flags are subject to being
+# renamed or dropped.
+KBUILD_CFLAGS  += -ftrivial-auto-var-init=zero
+KBUILD_CFLAGS  += $(call cc-option, -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang)
+endif
 ifdef CONFIG_DEBUG_INFO
 ifdef CONFIG_DEBUG_INFO_SPLIT
 KBUILD_CFLAGS   += $(call cc-option, -gsplit-dwarf, -g)
 else
 KBUILD_CFLAGS	+= -g
 endif
+ifneq ($(LLVM_IAS),1)
 KBUILD_AFLAGS	+= -Wa,-gdwarf-2
+endif
 endif
 ifdef CONFIG_DEBUG_INFO_DWARF4
 KBUILD_CFLAGS	+= $(call cc-option, -gdwarf-4,)
