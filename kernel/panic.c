@@ -186,12 +186,14 @@ EXPORT_SYMBOL(nmi_panic);
 extern int panic_flush_device_cache(int timeout);
 void flush_cache_on_panic(void)
 {
-    if (is_fulldump_enabled()){	//lfc modify from get_eng_version() to is_fulldump_enabled()
+#ifdef CONFIG_MTK_AEE_FEATURE
+   if (is_fulldump_enabled()){	//lfc modify from get_eng_version() to is_fulldump_enabled()
         pr_err("In full dump mode!\n");
     }else{
         pr_err("In mini dump mode and start flushing the devices cache!");
         panic_flush_device_cache(2000);
     }
+#endif
 }
 #endif  /*VENDOR_EDIT*/
 
