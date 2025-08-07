@@ -862,6 +862,7 @@ endif
 ifneq ($(CONFIG_FRAME_WARN),0)
 KBUILD_CFLAGS += $(call cc-option,-Wframe-larger-than=${CONFIG_FRAME_WARN})
 endif
+KBUILD_CFLAGS   += $(call cc-option,-fconserve-stack)
 
 #KBUILD_CFLAGS += -march=armv8-a+crypto -mcpu=cortex-a53 -mtune=cortex-a53
 #KBUILD_AFLAGS += -march=armv8-a+crypto -mcpu=cortex-a53 -mtune=cortex-a53
