@@ -1025,6 +1025,7 @@ KBUILD_CFLAGS += $(call cc-disable-warning, fortify-source)
 KBUILD_CFLAGS += $(call cc-disable-warning, ignored-qualifiers)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-variable)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-fuction)
+KBUILD_CFLAGS += $(call cc-disable-warning, trigraphs)
 # conserve stack if available
 #KBUILD_CFLAGS   += $(call cc-option,-fconserve-stack)
 
