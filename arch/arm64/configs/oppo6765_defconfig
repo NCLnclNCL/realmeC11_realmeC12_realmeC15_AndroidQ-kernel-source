@@ -632,7 +632,7 @@ CONFIG_WIREGUARD=y
 #ifdef ODM_WT_EDIT
 #Qun.Lin@ODM_WT.AD.Performance, 2020/05/13,disable debug config to increase avilable ram
 CONFIG_CGROUP_DEBUG=n
-CONFIG_DYNAMIC_DEBUG=n
+CONFIG_DYNAMIC_DEBUG=y // remove cause many exception trace and cannot load driver
 CONFIG_MTD=n
 CONFIG_MTK_AEE_FEATURE=n
 CONFIG_MTK_AEE_MRDUMP=n
