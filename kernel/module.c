@@ -1306,7 +1306,7 @@ static int check_version(Elf_Shdr *sechdrs,
 	return 1;
 
 bad_version:
-	pr_warn("%s: disagrees about version of symbol %s\n",
+	pr_warn("%s: disagrees about version of symbol- bypass %s\n",
 	       mod->name, symname);
 	return 1;
 }
