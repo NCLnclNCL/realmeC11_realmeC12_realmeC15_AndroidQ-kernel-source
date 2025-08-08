@@ -14,6 +14,11 @@
 # Connectivity combo driver
 # If KERNELRELEASE is defined, we've been invoked from the
 # kernel build system and can use its language.
+#WLAN_CHIP_ID=6765
+#MTK_COMBO_CHIP=CONNAC
+#CONFIG_MTK_COMBO_WIFI_HIF=axi
+#MTK_ANDROID_WMT=y
+#CONFIG_MTK_COMBO_CHIP=CONSYS_6765
 ifneq ($(KERNELRELEASE),)
     subdir-ccflags-y += -I$(srctree)/
     subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include
