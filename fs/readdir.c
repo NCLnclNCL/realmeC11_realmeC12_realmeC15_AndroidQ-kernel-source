@@ -18,8 +18,15 @@
 #include <linux/security.h>
 #include <linux/syscalls.h>
 #include <linux/unistd.h>
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+#include <linux/susfs_def.h>
+#endif
 
 #include <asm/uaccess.h>
+
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+extern int susfs_sus_ino_for_filldir64(unsigned long ino);
+#endif
 
 int iterate_dir(struct file *file, struct dir_context *ctx)
 {

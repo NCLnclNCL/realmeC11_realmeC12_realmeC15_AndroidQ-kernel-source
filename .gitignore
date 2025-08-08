@@ -39,7 +39,8 @@ Module.symvers
 *.dwo
 *.su
 *.c.[012]*.*
-
+*.rej
+/out*
 #
 # Top-level generic files
 #
