@@ -14,11 +14,6 @@
 # Connectivity combo driver
 # If KERNELRELEASE is defined, we've been invoked from the
 # kernel build system and can use its language.
-#WLAN_CHIP_ID=6765
-#MTK_COMBO_CHIP=CONNAC
-#CONFIG_MTK_COMBO_WIFI_HIF=axi
-#MTK_ANDROID_WMT=y
-#CONFIG_MTK_COMBO_CHIP=CONSYS_6765
 ifneq ($(KERNELRELEASE),)
     subdir-ccflags-y += -I$(srctree)/
     subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/base/power/include
@@ -41,7 +36,22 @@ endif
     $(MODULE_NAME)-objs += common/connectivity_build_in_adapter.o
     $(MODULE_NAME)-objs += common/wmt_build_in_adapter.o
 
-
+    # for gen4m options
+    export CONFIG_MTK_COMBO_WIFI_HIF=axi
+    export MTK_COMBO_CHIP=CONNAC
+    export WLAN_CHIP_ID=6765
+    export MTK_ANDROID_WMT=y
+    # Do build-in for xxx.c checking
+    subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
+    subdir-ccflags-y += -D MTK_WCN_BUILT_IN_DRIVER
+    obj-y += bt/mt66xx/
+    obj-y += common/
+    obj-y += wlan/adaptor/
+    obj-y += wlan/core/gen4m/
+    obj-y += gps/
+    export CFG_FM_CHIP_ID=6765
+    export CFG_FM_CHIP=mt6631
+    obj-y += fmradio/
     # Do build-in for Makefile checking
     # export CONFIG_WLAN_DRV_BUILD_IN=y
 
