@@ -782,7 +782,7 @@ else
 ifdef CONFIG_PROFILE_ALL_BRANCHES
 KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS   += -O2
+KBUILD_CFLAGS   += -O3
 endif
 endif
 
@@ -817,18 +817,18 @@ endif
 # This selects the stack protector compiler flag. Testing it is delayed
 # until after .config has been reprocessed, in the prepare-compiler-check
 # target.
-ifdef CONFIG_CC_STACKPROTECTOR_REGULAR
-  stackp-flag := -fstack-protector
-  stackp-name := REGULAR
-else
-ifdef CONFIG_CC_STACKPROTECTOR_STRONG
-  stackp-flag := -fstack-protector-strong
-  stackp-name := STRONG
-else
+#ifdef CONFIG_CC_STACKPROTECTOR_REGULAR
+ # stackp-flag := -fstack-protector
+#  stackp-name := REGULAR
+#else
+#ifdef CONFIG_CC_STACKPROTECTOR_STRONG
+#  stackp-flag := -fstack-protector-strong
+#  stackp-name := STRONG
+#else
   # Force off for distro compilers that enable stack protector by default.
   stackp-flag := $(call cc-option, -fno-stack-protector)
-endif
-endif
+#endif
+#endif
 # Find arch-specific stack protector compiler sanity-checking script.
 ifdef CONFIG_CC_STACKPROTECTOR
   stackp-path := $(srctree)/scripts/gcc-$(SRCARCH)_$(BITS)-has-stack-protector.sh
@@ -956,7 +956,7 @@ KBUILD_CFLAGS += $(call cc-disable-warning, stringop-truncation)
 # disable invalid "can't wrap" optimizations for signed / pointers
 KBUILD_CFLAGS	+= $(call cc-option,-fno-strict-overflow)
 # conserve stack if available
-KBUILD_CFLAGS   += $(call cc-option,-fconserve-stack)
+#KBUILD_CFLAGS   += $(call cc-option,-fconserve-stack)
 # clang sets -fmerge-all-constants by default as optimization, but this
 # is non-conforming behavior for C and in fact breaks the kernel, so we
 # need to disable it here generally.
