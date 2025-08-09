@@ -10,6 +10,10 @@ ifeq ($(KBUILD_MODPOST_FAIL_ON_WARNINGS),)
     KBUILD_MODPOST_FAIL_ON_WARNINGS=y
 endif
 
+ccflags-y += -Wno-unused-variable
+ccflags-y += -Wno-unused-value
+ccflags-y += -Wno-unused-result
+ccflags-y += -Wno-format
 DRIVER_BUILD_DATE=$(shell date +%Y%m%d%H%M%S)
 ccflags-y += -DDRIVER_BUILD_DATE='"$(DRIVER_BUILD_DATE)"'
 
@@ -110,11 +114,11 @@ else
 endif
 
 # Disable ASSERT() for user load, enable for others
-ifneq ($(TARGET_BUILD_VARIANT),user)
-    ccflags-y += -DBUILD_QA_DBG=1
-else
+#ifneq ($(TARGET_BUILD_VARIANT),user)
+#    ccflags-y += -DBUILD_QA_DBG=1
+#else
     ccflags-y += -DBUILD_QA_DBG=0
-endif
+#endif
 
 ifeq ($(CONFIG_MTK_COMBO_WIFI),y)
     ccflags-y += -DCFG_WPS_DISCONNECT=1

@@ -71,7 +71,7 @@
 #define BUILD_QA_DBG 0
 #endif
 
-#define DBG_DISABLE_ALL_LOG             0
+#define DBG_DISABLE_ALL_LOG             1
 
 /*******************************************************************************
  *                    E X T E R N A L   R E F E R E N C E S
@@ -103,12 +103,13 @@ extern int get_logtoomuch_enable(void) __attribute__((weak));
 #define DBG_CLASS_MASK          BITS(0, 7)
 
 #define DBG_LOG_LEVEL_DEFAULT \
-	(DBG_CLASS_ERROR | \
+	DBG_CLASS_ERROR
+#define DBG_LOG_LEVEL_MORE \
 	DBG_CLASS_WARN | \
 	DBG_CLASS_STATE | \
 	DBG_CLASS_EVENT | \
 	DBG_CLASS_INFO)
-#define DBG_LOG_LEVEL_MORE \
+
 	(DBG_LOG_LEVEL_DEFAULT | \
 	DBG_CLASS_TRACE)
 #define DBG_LOG_LEVEL_EXTREME \
@@ -295,8 +296,10 @@ enum DRV_STATUS_T {
  * #endif
  */
 #if DBG_DISABLE_ALL_LOG
-#define DBGLOG(_Module, _Class, _Fmt)
-#define DBGLOG_LIMITED(_Module, _Class, _Fmt)
+#define DBGLOG(_Module, _Class, _Fmt, ...)
+#define DBGLOG_LIMITED(_Module, _Class, _Fmt, ...)
+#define DBGFWLOG(_Module, _Class, _Fmt, ...)
+#define TOOL_PRINTLOG(_Module, _Class, _Fmt, ...)
 #define DBGLOG_MEM8(_Module, _Class, _StartAddr, _Length)
 #define DBGLOG_MEM32(_Module, _Class, _StartAddr, _Length)
 #else
