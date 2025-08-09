@@ -108,9 +108,9 @@ extern int get_logtoomuch_enable(void) __attribute__((weak));
 	(DBG_CLASS_WARN | \
 	DBG_CLASS_STATE | \
 	DBG_CLASS_EVENT | \
-	DBG_CLASS_INFO)
+	DBG_CLASS_INFO | \
 
-	(DBG_LOG_LEVEL_DEFAULT | \
+	DBG_LOG_LEVEL_DEFAULT | \
 	DBG_CLASS_TRACE)
 #define DBG_LOG_LEVEL_EXTREME \
 	(DBG_LOG_LEVEL_MORE | \
