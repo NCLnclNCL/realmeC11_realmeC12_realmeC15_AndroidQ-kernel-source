@@ -144,19 +144,22 @@ void ksu_apply_kernelsu_rules()
 	//allow self_init default_prop:file { read open getattr map };
 	//allow rutilsdaemon shell_exec:file { entrypoint read open execute };
 	ksu_allow(db, ALL, "default_prop", "file", "read");
+	ksu_allow(db, "rutilsdaemon", ALL, "file", "entrypoint");
+		ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
+	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "getattr");
 //	ksu_allow(db, "self_init", "default_prop", "file", "read");
 //		ksu_allow(db, "engineer_vendor_daemon", "default_prop", "file", "read");
 //	ksu_allow(db, "engineer_vendor_daemon", "default_prop", "file", "read");
-	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
-	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "getattr");
-	ksu_allow(db, "rutilsdaemon", "oppodebugtool_exec", "file", "entrypoint");
-		ksu_allow(db, "rutilsdaemon", "system_file", "file", "entrypoint");
-	ksu_allow(db, "rutilsdaemon", "criticallog_exec", "file", "entrypoint");
-		ksu_allow(db, "rutilsdaemon", "self_init_exec:", "file", "entrypoint");
+//	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
+//	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "getattr");
+//	ksu_allow(db, "rutilsdaemon", "oppodebugtool_exec", "file", "entrypoint");
+//		ksu_allow(db, "rutilsdaemon", "system_file", "file", "entrypoint");
+//	ksu_allow(db, "rutilsdaemon", "criticallog_exec", "file", "entrypoint");
+//		ksu_allow(db, "rutilsdaemon", "self_init_exec:", "file", "entrypoint");
 	//	ksu_allow(db, "self_init", "system_file", "file", "read");
-		ksu_allow(db, "rutilsdaemon", "criticallog_exec", "file", "entrypoint");
+//		ksu_allow(db, "rutilsdaemon", "criticallog_exec", "file", "entrypoint");
 	
-	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
+//	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
 	
 	
 	
