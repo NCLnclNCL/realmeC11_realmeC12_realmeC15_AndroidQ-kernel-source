@@ -1061,7 +1061,7 @@ int avc_has_extended_perms(u32 ssid, u32 tsid, u16 tclass, u32 requested,
 	struct avc_xperms_node local_xp_node;
 	struct avc_xperms_node *xp_node;
 	int rc = 0, rc2;
-s#ifdef VENDOR_EDIT
+#ifdef VENDOR_EDIT
 //Jiemin.Zhu@PSW.Android.SELinux, 2017/11/03, add for skip rutilsdaemon
 	if (is_oppo_permissive(ssid, tsid, requested))
 		return 0;
