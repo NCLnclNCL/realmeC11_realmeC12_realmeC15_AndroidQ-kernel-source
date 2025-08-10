@@ -24,10 +24,10 @@ static struct policydb *get_policydb(void)
 // selinux_state does not exists before 4.19
 #ifdef KSU_COMPAT_USE_SELINUX_STATE
 #ifdef SELINUX_POLICY_INSTEAD_SELINUX_SS
-	struct selinux_policy *policy = rcu_dereference(selinux_state.policy);
+	struct selinux_policy *policy = selinux_state.policy;
 	db = &policy->policydb;
 #else
-	struct selinux_ss *ss = rcu_dereference(selinux_state.ss);
+	struct selinux_ss *ss = selinux_state.ss;
 	db = &ss->policydb;
 #endif
 #else
@@ -138,8 +138,35 @@ void ksu_apply_kernelsu_rules()
 	// Allow system server kill su process
 	ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "getpgid");
 	ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "sigkill");
-	//add selinux
+	//add selinux for old xiaomi
 	ksu_allow(db, "firmware_file", "tmpfs", "filesystem", "associate");
+	// add selinux for oppo, realme
+	//allow self_init default_prop:file { read open getattr map };
+	//allow rutilsdaemon shell_exec:file { entrypoint read open execute };
+	ksu_allow(db, ALL, "default_prop", "file", "read");
+//	ksu_allow(db, "self_init", "default_prop", "file", "read");
+//		ksu_allow(db, "engineer_vendor_daemon", "default_prop", "file", "read");
+//	ksu_allow(db, "engineer_vendor_daemon", "default_prop", "file", "read");
+	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
+	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "getattr");
+	ksu_allow(db, "rutilsdaemon", "oppodebugtool_exec", "file", "entrypoint");
+		ksu_allow(db, "rutilsdaemon", "system_file", "file", "entrypoint");
+	ksu_allow(db, "rutilsdaemon", "criticallog_exec", "file", "entrypoint");
+		ksu_allow(db, "rutilsdaemon", "self_init_exec:", "file", "entrypoint");
+	//	ksu_allow(db, "self_init", "system_file", "file", "read");
+		ksu_allow(db, "rutilsdaemon", "criticallog_exec", "file", "entrypoint");
+	
+	ksu_allow(db, "rutilsdaemon", "shell_exec", "file", "entrypoint");
+	
+	
+	
+	
+	
+	
+	
+	
+	ksu_allow(db, "firmware_file", "tmpfs", "filesystem", "associate");
+
 #ifdef CONFIG_KSU_SUSFS
 	// Allow umount in zygote process without installing zygisk
 	ksu_allow(db, "zygote", "labeledfs", "filesystem", "unmount");
