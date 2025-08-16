@@ -3604,6 +3604,7 @@ static const struct pid_entry tid_base_stuff[] = {
 #ifdef CONFIG_CPU_FREQ_TIMES
 	ONE("time_in_state", 0444, proc_time_in_state_show),
 #endif
+REG("static_ux", 0666, proc_static_ux_operations),
 #ifdef VENDOR_EDIT
 /* Wen.Luo@BSP.Kernel.Stability, 2019/04/26, Add for Process memory statistics */
 	REG("real_phymemory",   S_IRUGO, proc_pid_real_phymemory_ops),
