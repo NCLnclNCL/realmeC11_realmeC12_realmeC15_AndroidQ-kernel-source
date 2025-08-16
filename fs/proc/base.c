@@ -3609,8 +3609,7 @@ static const struct pid_entry tid_base_stuff[] = {
 /* Wen.Luo@BSP.Kernel.Stabilityendifendif, 2019/04/26, Add for Process memory statistics */
 	REG("real_phymemory",   S_IRUGO, proc_pid_real_phymemory_ops),
 #endif
-REG("static_ux", S_IRUGO | S_IWUGO, proc_static_ux_operations),
-#endif 
+REG("static_ux", S_IRUGO | S_IWUGO, proc_static_ux_operations), 
 };
 
 static int proc_tid_base_readdir(struct file *file, struct dir_context *ctx)
