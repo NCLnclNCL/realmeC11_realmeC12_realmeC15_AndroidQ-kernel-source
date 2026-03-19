@@ -396,7 +396,9 @@ KBUILD_CFLAGS   := -fno-strict-aliasing -fno-common -fshort-wchar \
 KBUILD_CPPFLAGS := -D__KERNEL__
 
 # Flags to tune generated code for Cortex-A53 CPU
-KBUILD_CFLAGS += -march=armv8-a -mcpu=cortex-a53+crypto -mtune=cortex-a53
+KBUILD_CFLAGS += -march=armv8-a+crc+crypto -mcpu=cortex-a53+crc+crypto -mtune=cortex-a53
+KBUILD_AFLAGS += -march=armv8-a+crc+crypto -mcpu=cortex-a53+crc+crypto -mtune=cortex-a53
+#KBUILD_CFLAGS += -march=armv8-a -mcpu=cortex-a53+crypto -mtune=cortex-a53
 #-march=armv8-a+crypto -mcpu=cortex-a53 -mtune=cortex-a53
 #-mcpu=cortex-a55+crypto -mtune=cortex-a55
 KBUILD_AFLAGS_KERNEL :=
