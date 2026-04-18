@@ -1105,17 +1105,13 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void 
 		return ERR_PTR(-ENODEV);
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow;
-	}
+
 
 	// For newly created mounts, the only caller process we care is KSU
 	if (unlikely(susfs_is_current_ksu_domain())) {
 		mnt = alloc_vfsmnt(name, true, 0);
 		goto bypass_orig_flow;
 	}
-orig_flow:
 	mnt = alloc_vfsmnt(name, false, 0);
 bypass_orig_flow:
 #else
