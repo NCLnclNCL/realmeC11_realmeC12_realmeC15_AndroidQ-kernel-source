@@ -1180,10 +1180,7 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 	struct mount *mnt;
 	int err;
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-		// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow;
-	}
+	
 
 	bool is_current_ksu_domain = susfs_is_current_ksu_domain();
 	bool is_current_zygote_domain = susfs_is_current_zygote_domain();
@@ -1220,7 +1217,7 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 		mnt = alloc_vfsmnt(old->mnt_devname, true, 0);
 		goto bypass_orig_flow;
 	}
-orig_flow:
+
 	mnt = alloc_vfsmnt(old->mnt_devname, false, 0);
 bypass_orig_flow:
 #else
@@ -1279,17 +1276,14 @@ bypass_orig_flow:
 	mnt->mnt_parent = mnt;
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow_1;
-	}
+
 
 	// If caller process is zygote and not doing unshare, so we just reorder the mnt_id
 	if (likely(is_current_zygote_domain) && !(flag & CL_ZYGOTE_COPY_MNT_NS)) {
 		mnt->mnt.susfs_mnt_id_backup = mnt->mnt_id;
 		mnt->mnt_id = current->susfs_last_fake_mnt_id++;
 	}
-	orig_flow_1:
+	
 #endif
 
 	lock_mount_hash();
@@ -3236,9 +3230,7 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
 		copy_flags |= CL_SHARED_TO_SLAVE | CL_UNPRIVILEGED;
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow;
-	}
+	
 	bool is_zygote_pid = susfs_is_current_zygote_domain();
 	int last_entry_mnt_id = 0;
 	// Always let clone_mnt() in copy_tree() know it is from copy_mnt_ns()
@@ -3247,7 +3239,7 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
 		// Let clone_mnt() in copy_tree() know copy_mnt_ns() is run by zygote process
 		copy_flags |= CL_ZYGOTE_COPY_MNT_NS;
 	}
-	orig_flow:
+	
 #endif
 	new = copy_tree(old, old->mnt.mnt_root, copy_flags);
 	if (IS_ERR(new)) {
@@ -3287,9 +3279,7 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
 	}
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow_1;
-	}
+	
 	// current->susfs_last_fake_mnt_id -> to record last valid fake mnt_id to zygote pid
 	// q->mnt.susfs_mnt_id_backup -> original mnt_id
 	// q->mnt_id -> will be modified to the fake mnt_id
@@ -3310,7 +3300,7 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
 	// should be fine here assuming zygote is forking/unsharing app in one single thread.
 	// Or should we put a lock here?
 	current->susfs_last_fake_mnt_id = last_entry_mnt_id;
-	orig_flow_1:
+	
 #endif
 
 	namespace_unlock();
