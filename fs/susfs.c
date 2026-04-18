@@ -1049,8 +1049,8 @@ static int susfs_sdcard_monitor_fn(void *data)
 			path_put(&path);
 
 			SUSFS_LOGI("Sleeping for '%d' more ms just in case some other modules are still mounting stuff\n",
-						SDCARD_MONITOR_INTERVAL_MS);
-			msleep(SDCARD_MONITOR_INTERVAL_MS);
+						SDCARD_SLEEP_INTERVAL_MS);
+			msleep(SDCARD_SLEEP_INTERVAL_MS);
 
 			SUSFS_LOGI("set susfs_is_sdcard_android_data_decrypted to true\n");
 
