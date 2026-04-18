@@ -1061,7 +1061,7 @@ static int susfs_sdcard_monitor_fn(void *data)
 
 		max_attempts--;
 		SUSFS_LOGI("%d attempts left\n", max_attempts);
-		msleep(SDCARD_SLEEP_INTERVAL_MS);
+		msleep(SDCARD_MONITOR_INTERVAL_MS);
 	}
 
 	SUSFS_LOGI("No more attempts, assuming susfs_is_sdcard_android_data_decrypted is true now\n");
