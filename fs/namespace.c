@@ -1288,7 +1288,7 @@ bypass_orig_flow:
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_boot_completed_triggered) {
+	if (susfs_is_sdcard_android_data_decrypted) {
 		goto orig_flow_1;
 	}
 
