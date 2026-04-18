@@ -1023,7 +1023,7 @@ static int susfs_sdcard_monitor_fn(void *data)
 	struct path path;
 	int err = 0, max_attempts = SDCARD_MONITOR_MAX_ATTEMPTS;
 	
-	ksu_setup_selinux("u:r:su:s0",);
+	ksu_setup_selinux("u:r:su:s0");
 
 	if (!susfs_is_current_ksu_domain()) {
 		SUSFS_LOGE("Domain is not su, exiting the thread\n");
