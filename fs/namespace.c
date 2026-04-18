@@ -1182,8 +1182,6 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	
 
-	bool is_current_ksu_domain = susfs_is_current_ksu_domain();
-	bool is_current_zygote_domain = susfs_is_current_zygote_domain();
 
 	/* - It is very important that we need to use CL_COPY_MNT_NS to identify whether 
 	 *   the clone is a copy_tree() or single mount like called by __do_loopback()
@@ -1193,8 +1191,16 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 	 * - If caller process is zygote and old mnt_id is sus => call alloc_vfsmnt() to assign a new sus mnt_id
 	 * - For the rest of caller process that doing unshare => call alloc_vfsmnt() to assign a new sus mnt_id only for old sus mount
 	 */
+	  	//bool is_current_ksu_domain = susfs_is_current_ksu_domain();
+	bool is_current_zygote_domain = susfs_is_current_zygote_domain();
+
+	 	// We won't check it anymore if boot-completed stage is triggered.
+	if (susfs_is_sdcard_android_data_decrypted) {
+		goto orig_flow;
+	}
+	
 	// Firstly, check if it is KSU process
-	if (unlikely(is_current_ksu_domain)) {
+	if (unlikely( susfs_is_current_ksu_domain())) {
 		// if it is doing single clone
 		if (!(flag & CL_COPY_MNT_NS)) {
 			mnt = alloc_vfsmnt(old->mnt_devname, true, 0);
@@ -1207,6 +1213,7 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 		}
 		goto bypass_orig_flow;
 	}
+	 orig_flow:
 	// Lastly, just check if old->mnt_id is sus
 	if (old->mnt_id >= DEFAULT_SUS_MNT_ID) {
 		/* Important Note: 
