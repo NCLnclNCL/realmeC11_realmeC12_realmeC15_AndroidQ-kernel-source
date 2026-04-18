@@ -217,7 +217,7 @@ static int mnt_alloc_group_id(struct mount *mnt)
 	int res;
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	if ( mnt->mnt_id >= DEFAULT_SUS_MNT_ID) {
+	if (!susfs_is_sdcard_android_data_decrypted && mnt->mnt_id >= DEFAULT_SUS_MNT_ID) {
 		if (!ida_pre_get(&susfs_mnt_group_ida, GFP_KERNEL))
 			return -ENOMEM;
 		// If so, assign a sus mnt_group id DEFAULT_SUS_MNT_GROUP_ID from susfs_mnt_group_ida
@@ -250,7 +250,7 @@ void mnt_release_group_id(struct mount *mnt)
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// If mnt->mnt_group_id >= DEFAULT_SUS_MNT_GROUP_ID, it means 'mnt' is also sus mount,
 	// then we free the mnt->mnt_group_id from susfs_mnt_group_ida
-	if (id >= DEFAULT_SUS_MNT_GROUP_ID) {
+	if ( !susfs_is_sdcard_android_data_decrypted &&id >= DEFAULT_SUS_MNT_GROUP_ID) {
 		ida_remove(&susfs_mnt_group_ida, id);
 		if (susfs_mnt_group_start > id)
 			susfs_mnt_group_start = id;
