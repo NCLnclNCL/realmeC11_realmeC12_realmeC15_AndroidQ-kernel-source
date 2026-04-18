@@ -31,6 +31,7 @@
 #include "internal.h"
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+extern bool susfs_is_boot_completed_triggered;
 extern bool susfs_is_current_ksu_domain(void);
 extern bool susfs_is_current_zygote_domain(void);
 
@@ -214,7 +215,7 @@ static int mnt_alloc_group_id(struct mount *mnt)
 	int res;
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	if (mnt->mnt_id >= DEFAULT_SUS_MNT_ID) {
+	if (!susfs_is_sdcard_android_data_decrypted && mnt->mnt_id >= DEFAULT_SUS_MNT_ID) {
 		if (!ida_pre_get(&susfs_mnt_group_ida, GFP_KERNEL))
 			return -ENOMEM;
 		// If so, assign a sus mnt_group id DEFAULT_SUS_MNT_GROUP_ID from susfs_mnt_group_ida
@@ -247,7 +248,7 @@ void mnt_release_group_id(struct mount *mnt)
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// If mnt->mnt_group_id >= DEFAULT_SUS_MNT_GROUP_ID, it means 'mnt' is also sus mount,
 	// then we free the mnt->mnt_group_id from susfs_mnt_group_ida
-	if (id >= DEFAULT_SUS_MNT_GROUP_ID) {
+	if (!susfs_is_sdcard_android_data_decrypted && id >= DEFAULT_SUS_MNT_GROUP_ID) {
 		ida_remove(&susfs_mnt_group_ida, id);
 		if (susfs_mnt_group_start > id)
 			susfs_mnt_group_start = id;
@@ -1102,11 +1103,17 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void 
 		return ERR_PTR(-ENODEV);
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	// We won't check it anymore if boot-completed stage is triggered.
+	if (susfs_is_boot_completed_triggered) {
+		goto orig_flow;
+	}
+
 	// For newly created mounts, the only caller process we care is KSU
 	if (unlikely(susfs_is_current_ksu_domain())) {
 		mnt = alloc_vfsmnt(name, true, 0);
 		goto bypass_orig_flow;
 	}
+orig_flow:
 	mnt = alloc_vfsmnt(name, false, 0);
 bypass_orig_flow:
 #else
@@ -1175,6 +1182,11 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 	struct mount *mnt;
 	int err;
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+		// We won't check it anymore if boot-completed stage is triggered.
+	if (susfs_is_boot_completed_triggered) {
+		goto orig_flow;
+	}
+
 	bool is_current_ksu_domain = susfs_is_current_ksu_domain();
 	bool is_current_zygote_domain = susfs_is_current_zygote_domain();
 
@@ -1210,6 +1222,7 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 		mnt = alloc_vfsmnt(old->mnt_devname, true, 0);
 		goto bypass_orig_flow;
 	}
+orig_flow:
 	mnt = alloc_vfsmnt(old->mnt_devname, false, 0);
 bypass_orig_flow:
 #else
@@ -1268,11 +1281,17 @@ bypass_orig_flow:
 	mnt->mnt_parent = mnt;
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	// We won't check it anymore if boot-completed stage is triggered.
+	if (susfs_is_boot_completed_triggered) {
+		goto orig_flow_1;
+	}
+
 	// If caller process is zygote and not doing unshare, so we just reorder the mnt_id
 	if (likely(is_current_zygote_domain) && !(flag & CL_ZYGOTE_COPY_MNT_NS)) {
 		mnt->mnt.susfs_mnt_id_backup = mnt->mnt_id;
 		mnt->mnt_id = current->susfs_last_fake_mnt_id++;
 	}
+	orig_flow_1:
 #endif
 
 	lock_mount_hash();
