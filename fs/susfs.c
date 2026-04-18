@@ -1020,17 +1020,10 @@ bool susfs_is_sdcard_android_data_decrypted __read_mostly = false;
 static struct task_struct *susfs_sdcard_monitor_thread;
 static int susfs_sdcard_monitor_fn(void *data)
 {
-	struct cred *cred = prepare_creds();
 	struct path path;
 	int err = 0, max_attempts = SDCARD_MONITOR_MAX_ATTEMPTS;
-
-	if (!cred) {
-		SUSFS_LOGE("Failed to prepare creds!\n");
-		return -ENOMEM;
-	}
-
-	setup_selinux("u:r:su:s0", cred);
-	commit_creds(cred);
+	
+	ksu_setup_selinux("u:r:su:s0",);
 
 	if (!susfs_is_current_ksu_domain()) {
 		SUSFS_LOGE("Domain is not su, exiting the thread\n");
