@@ -1143,19 +1143,6 @@ bypass_orig_flow:
 	mnt->mnt_mountpoint = mnt->mnt.mnt_root;
 	mnt->mnt_parent = mnt;
 
-#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	 // We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow_1;
-}
-	// If caller process is zygote, then it is a normal mount, so we just reorder the mnt_id
-	if (susfs_is_current_zygote_domain()) {
-		mnt->mnt.susfs_mnt_id_backup = mnt->mnt_id;
-		mnt->mnt_id = current->susfs_last_fake_mnt_id++;
-	}
-	 orig_flow_1:
-#endif
-
 	lock_mount_hash();
 	list_add_tail(&mnt->mnt_instance, &root->d_sb->s_mounts);
 	unlock_mount_hash();
