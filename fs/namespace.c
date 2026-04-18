@@ -170,10 +170,6 @@ static void mnt_free_id(struct mount *mnt)
 {
 	int id = mnt->mnt_id;
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_sdcard_android_data_decrypted) {
-		goto orig_flow;
-	}
 
 	int mnt_id_backup = mnt->mnt.susfs_mnt_id_backup;
 	// We should first check the 'mnt->mnt.susfs_mnt_id_backup', see if it is DEFAULT_SUS_MNT_ID_FOR_KSU_PROC_UNSHARE
@@ -202,7 +198,6 @@ static void mnt_free_id(struct mount *mnt)
 		spin_unlock(&mnt_id_lock);
 		return;
 	}
-	orig_flow:
 #endif
 
 	spin_lock(&mnt_id_lock);
@@ -222,7 +217,7 @@ static int mnt_alloc_group_id(struct mount *mnt)
 	int res;
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-	if (!susfs_is_sdcard_android_data_decrypted && mnt->mnt_id >= DEFAULT_SUS_MNT_ID) {
+	if ( mnt->mnt_id >= DEFAULT_SUS_MNT_ID) {
 		if (!ida_pre_get(&susfs_mnt_group_ida, GFP_KERNEL))
 			return -ENOMEM;
 		// If so, assign a sus mnt_group id DEFAULT_SUS_MNT_GROUP_ID from susfs_mnt_group_ida
@@ -255,7 +250,7 @@ void mnt_release_group_id(struct mount *mnt)
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// If mnt->mnt_group_id >= DEFAULT_SUS_MNT_GROUP_ID, it means 'mnt' is also sus mount,
 	// then we free the mnt->mnt_group_id from susfs_mnt_group_ida
-	if (!susfs_is_sdcard_android_data_decrypted && id >= DEFAULT_SUS_MNT_GROUP_ID) {
+	if (id >= DEFAULT_SUS_MNT_GROUP_ID) {
 		ida_remove(&susfs_mnt_group_ida, id);
 		if (susfs_mnt_group_start > id)
 			susfs_mnt_group_start = id;
