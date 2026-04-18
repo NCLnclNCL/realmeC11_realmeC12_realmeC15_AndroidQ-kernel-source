@@ -31,7 +31,7 @@
 #include "internal.h"
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-extern bool susfs_is_boot_completed_triggered;
+extern bool susfs_is_sdcard_android_data_decrypted;
 extern bool susfs_is_current_ksu_domain(void);
 extern bool susfs_is_current_zygote_domain(void);
 
@@ -170,6 +170,11 @@ static void mnt_free_id(struct mount *mnt)
 {
 	int id = mnt->mnt_id;
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	// We won't check it anymore if boot-completed stage is triggered.
+	if (susfs_is_sdcard_android_data_decrypted) {
+		goto orig_flow;
+	}
+
 	int mnt_id_backup = mnt->mnt.susfs_mnt_id_backup;
 	// We should first check the 'mnt->mnt.susfs_mnt_id_backup', see if it is DEFAULT_SUS_MNT_ID_FOR_KSU_PROC_UNSHARE
 	// if so, these mnt_id were not assigned by mnt_alloc_id() so we don't need to free it.
@@ -198,6 +203,7 @@ static void mnt_free_id(struct mount *mnt)
 		return;
 	}
 #endif
+	orig_flow:
 	spin_lock(&mnt_id_lock);
 	ida_remove(&mnt_id_ida, id);
 	if (mnt_id_start > id)
@@ -1104,7 +1110,7 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void 
 
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 	// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_boot_completed_triggered) {
+	if (susfs_is_sdcard_android_data_decrypted) {
 		goto orig_flow;
 	}
 
@@ -1183,7 +1189,7 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
 	int err;
 #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 		// We won't check it anymore if boot-completed stage is triggered.
-	if (susfs_is_boot_completed_triggered) {
+	if (susfs_is_sdcard_android_data_decrypted) {
 		goto orig_flow;
 	}
 
