@@ -93,6 +93,7 @@ static void inotify_fdinfo(struct seq_file *m, struct fsnotify_mark *mark)
 	inode_mark = container_of(mark, struct inotify_inode_mark, fsn_mark);
 	inode = igrab(mark->inode);
 	if (inode) {
+		u32 mask = mark->mask & IN_ALL_EVENTS;
 		/*
 		 * IN_ALL_EVENTS represents all of the mask bits
 		 * that we expose to userspace.  There is at
