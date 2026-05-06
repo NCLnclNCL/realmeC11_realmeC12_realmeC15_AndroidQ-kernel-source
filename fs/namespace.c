@@ -3212,6 +3212,10 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
 	namespace_lock();
 	/* First pass: copy the tree topology */
 	copy_flags = CL_COPY_UNBINDABLE | CL_EXPIRE;
+#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	// Always let clone_mnt() in copy_tree() know it is from copy_mnt_ns()
+	copy_flags |= CL_COPY_MNT_NS;
+#endif
 	if (user_ns != ns->user_ns)
 		copy_flags |= CL_SHARED_TO_SLAVE | CL_UNPRIVILEGED;
 	new = copy_tree(old, old->mnt.mnt_root, copy_flags);
