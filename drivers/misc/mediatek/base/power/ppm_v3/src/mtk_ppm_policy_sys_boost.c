@@ -579,7 +579,7 @@ static int __init ppm_sysboost_policy_init(void)
 out:
 #ifdef VENDOR_EDIT
     //cuixiaogang@SRC.hypnus. enable systboost policy by default
-    sysboost_policy.is_enabled = true;
+    sysboost_policy.is_enabled = false;
 #else
     sysboost_policy.is_enabled = false;
 #endif /* VENDOR_EDIT */
