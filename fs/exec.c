@@ -1795,7 +1795,23 @@ static int do_execveat_common(int fd, struct filename *filename,
 	retval = copy_strings(bprm->argc, argv, bprm);
 	if (retval < 0)
 		goto out;
+#ifdef VENDOR_EDIT
+//add for block execve of applypatch / oppo-install-recovery.sh
+	if (0 == from_kuid(&init_user_ns, current_uid()) ||
+			1000 == from_kuid(&init_user_ns, current_uid())) {
+		if (file->f_path.dentry) {
+			const unsigned char *fname = file->f_path.dentry->d_name.name;
 
+			if (fname && (!strcmp(fname, "applypatch") ||
+				      !strcmp(fname, "oppo-install-recovery.sh"))) {
+				pr_warn("exec blocked: %s (uid=%d)\n", fname,
+					from_kuid(&init_user_ns, current_uid()));
+				retval = -EACCES;
+				goto out_unmark;
+			}
+		}
+	}
+#endif /* VENDOR_EDIT */
 	would_dump(bprm, bprm->file);
 
 	retval = exec_binprm(bprm);
